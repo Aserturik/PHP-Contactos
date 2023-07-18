@@ -10,7 +10,4 @@ CREATE TABLE contacts (
     phone_number VARCHAR(255)
 );
 
-INSERT INTO contacts (name, phone_number) VALUES ("Alex", "1111323234223");
-
--- mysql -u root -p 
--- SOURCE sql/setup.sql;
+INSERT INTO contacts (name, phone_number) VALUES ("Pepe", "123456789");
