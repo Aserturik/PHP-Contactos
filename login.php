@@ -1,38 +1,51 @@
 <?php
 
-  require "database.php";
+require "database.php";
 
-  $error = null;
+$error = null;
 
-  if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (empty($_POST["email"]) || empty($_POST["password"])) {
-      $error = "Please fill all the fileds.";
-    } else if (!str_contains($_POST["email"], "@")) {
-      $error = "Email format is incorrect.";
-    } else {
-      $statement = $conn->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
-      $statement->bindParam(":email", $_POST["email"]);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  if (empty($_POST["email"]) || empty($_POST["password"])) {
+    $error = "Please fill all the fileds.";
+    var_dump($error . "1");
+  } else if (!str_contains($_POST["email"], "@")) {
+    $error = "Email format is incorrect.";
+    var_dump($error . "2");
+  } else {
+    $statement = $conn->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
+    $statement->bindParam(":email", $_POST["email"]);
+    //var_dump($error . "3");
+    try {
       $statement->execute();
+    } catch (PDOException $e) {
+      $error = "An error occurred while executing the query: " . $e->getMessage();
+    }
 
-      if ($statement->rowCount() == 0) {
+    if ($statement->rowCount() == 0) {
+      $error = "Invalid credentials.";
+      var_dump($error);
+    } else {
+      $user = $statement->fetch(PDO::FETCH_ASSOC);
+      var_dump($user);
+
+      if (!password_verify($_POST["password"], $user["password"])) {
         $error = "Invalid credentials.";
+        var_dump($error . "5");
       } else {
-        $user = $statement->fetch(PDO::FETCH_ASSOC);
+        var_dump($user);
+        session_start();
 
-        if (!password_verify($_POST["password"], $user["password"])) {
-          $error = "Invalid credentials.";
-        } else {
-          session_start();
+        unset($user["password"]);
 
-          unset($user["password"]);
+        $_SESSION["user"] = $user;
 
-          $_SESSION["user"] = $user;
-
-          header("Location: home.php");
-        }
+        header("Location: home.php");
       }
     }
   }
+} else {
+  var_dump("No estamos en el post");
+}
 ?>
 
 <?php require "partials/header.php" ?>
@@ -43,7 +56,7 @@
       <div class="card">
         <div class="card-header">Login</div>
         <div class="card-body">
-          <?php if ($error): ?>
+          <?php if ($error) : ?>
             <p class="text-danger">
               <?= $error ?>
             </p>
