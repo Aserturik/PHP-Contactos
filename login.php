@@ -7,14 +7,11 @@ $error = null;
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   if (empty($_POST["email"]) || empty($_POST["password"])) {
     $error = "Please fill all the fileds.";
-    var_dump($error . "1");
   } else if (!str_contains($_POST["email"], "@")) {
     $error = "Email format is incorrect.";
-    var_dump($error . "2");
   } else {
     $statement = $conn->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
     $statement->bindParam(":email", $_POST["email"]);
-    //var_dump($error . "3");
     try {
       $statement->execute();
     } catch (PDOException $e) {
@@ -23,16 +20,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($statement->rowCount() == 0) {
       $error = "Invalid credentials.";
-      var_dump($error);
     } else {
       $user = $statement->fetch(PDO::FETCH_ASSOC);
-      var_dump($user);
 
       if (!password_verify($_POST["password"], $user["password"])) {
         $error = "Invalid credentials.";
-        var_dump($error . "5");
       } else {
-        var_dump($user);
         session_start();
 
         unset($user["password"]);
@@ -43,8 +36,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       }
     }
   }
-} else {
-  var_dump("No estamos en el post");
 }
 ?>
 
